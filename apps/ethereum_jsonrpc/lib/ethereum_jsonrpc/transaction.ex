@@ -66,7 +66,9 @@ defmodule EthereumJSONRPC.Transaction do
           transaction_index: non_neg_integer(),
           max_priority_fee_per_gas: non_neg_integer(),
           max_fee_per_gas: non_neg_integer(),
-          type: non_neg_integer()
+          type: non_neg_integer(),
+          wrapped: map() | nil,
+          confidential_compute_result: binary() | nil
         }
 
   @doc """
@@ -105,7 +107,9 @@ defmodule EthereumJSONRPC.Transaction do
         to_address_hash: "0x5df9b87991262f6ba471f09758cde1c0fc1de734",
         v: 28,
         value: 31337,
-        transaction_index: 0
+        transaction_index: 0,
+        confidential_compute_result: nil,
+        wrapped: nil
       }
 
   Erigon `elixir` from txpool_content method can be converted to `params`.
@@ -148,7 +152,9 @@ defmodule EthereumJSONRPC.Transaction do
         transaction_index: nil,
         type: 2,
         v: 0,
-        value: 275000000000000000
+        value: 275000000000000000,
+        confidential_compute_result: nil,
+        wrapped: nil
       }
   """
   @spec elixir_to_params(elixir) :: params
@@ -192,7 +198,9 @@ defmodule EthereumJSONRPC.Transaction do
       transaction_index: index,
       type: type,
       max_priority_fee_per_gas: max_priority_fee_per_gas,
-      max_fee_per_gas: max_fee_per_gas
+      max_fee_per_gas: max_fee_per_gas,
+      wrapped: transaction["wrapped"],
+      confidential_compute_result: transaction["confidentialComputeResult"]
     }
 
     if transaction["creates"] do
@@ -242,7 +250,9 @@ defmodule EthereumJSONRPC.Transaction do
       transaction_index: index,
       type: type,
       max_priority_fee_per_gas: max_priority_fee_per_gas,
-      max_fee_per_gas: max_fee_per_gas
+      max_fee_per_gas: max_fee_per_gas,
+      wrapped: transaction["wrapped"],
+      confidential_compute_result: transaction["confidentialComputeResult"]
     }
 
     if transaction["creates"] do
@@ -287,7 +297,9 @@ defmodule EthereumJSONRPC.Transaction do
       v: v,
       value: value,
       transaction_index: index,
-      type: type
+      type: type,
+      wrapped: transaction["wrapped"],
+      confidential_compute_result: transaction["confidentialComputeResult"]
     }
 
     if transaction["creates"] do
@@ -330,7 +342,9 @@ defmodule EthereumJSONRPC.Transaction do
       to_address_hash: to_address_hash,
       v: v,
       value: value,
-      transaction_index: index
+      transaction_index: index,
+      wrapped: transaction["wrapped"],
+      confidential_compute_result: transaction["confidentialComputeResult"]
     }
 
     if transaction["creates"] do
@@ -446,7 +460,7 @@ defmodule EthereumJSONRPC.Transaction do
   #
   # "txType": to avoid FunctionClauseError when indexing Wanchain
   defp entry_to_elixir({key, value})
-       when key in ~w(blockHash condition creates from hash input jsonrpc publicKey raw to txType),
+       when key in ~w(blockHash condition creates from hash input jsonrpc publicKey raw to txType wrapped confidentialComputeResult),
        do: {key, value}
 
   # specific to Nethermind client

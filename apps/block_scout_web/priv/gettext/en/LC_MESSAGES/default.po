@@ -3686,3 +3686,15 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Yul"
 msgstr ""
+
+#: lib/block_scout_web/templates/transaction/overview.html.eex:527
+#: lib/block_scout_web/templates/transaction/overview.html.eex:528
+#, elixir-autogen, elixir-format
+msgid "Confidential Compute Result"
+msgstr ""
+
+#: lib/block_scout_web/templates/transaction/overview.html.eex:542
+#: lib/block_scout_web/templates/transaction/overview.html.eex:543
+#, elixir-autogen, elixir-format
+msgid "Wrapped"
+msgstr ""

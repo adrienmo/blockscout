@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - suave
 env:
   OTP_VERSION: '25.2.1'
   ELIXIR_VERSION: '1.14.3'
@@ -21,10 +22,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -53,9 +54,10 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          cache-from: type=registry,ref=blockscout/blockscout:buildcache
-          cache-to: type=registry,ref=blockscout/blockscout:buildcache,mode=max
-          tags: blockscout/blockscout:master, blockscout/blockscout:${{ env.RELEASE_VERSION }}.commit.${{ env.SHORT_SHA }}
+          tags: adrienmo/blockscout:suave
+          platforms: |
+            linux/arm64
+            linux/amd64
           build-args: |
             CACHE_EXCHANGE_RATES_PERIOD=
             API_V1_READ_METHODS_DISABLED=false
@@ -71,54 +73,4 @@ jobs:
             CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL=
             BLOCKSCOUT_VERSION=v${{ env.RELEASE_VERSION }}-beta.+commit.${{ env.SHORT_SHA }}
             RELEASE_VERSION=${{ env.RELEASE_VERSION }}
-
-      - name: Build and push Docker image for frontend
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./docker/Dockerfile
-          push: true
-          cache-from: type=registry,ref=blockscout/blockscout:buildcache
-          tags: blockscout/blockscout:frontend-main
-          build-args: |
-            CACHE_EXCHANGE_RATES_PERIOD=
-            API_V1_READ_METHODS_DISABLED=false
-            DISABLE_WEBAPP=false
-            API_V1_WRITE_METHODS_DISABLED=false
-            CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED=
-            ADMIN_PANEL_ENABLED=false
-            CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL=
-            SESSION_COOKIE_DOMAIN=k8s-dev.blockscout.com
-            BLOCKSCOUT_VERSION=v${{ env.RELEASE_VERSION }}-beta.+commit.${{ env.SHORT_SHA }}
-            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
-  deploy_e2e:
-    needs: push_to_registry
-    runs-on: ubuntu-latest
-    permissions: write-all
-    steps:
-      - name: Get Vault credentials
-        id: retrieve-vault-secrets
-        uses: hashicorp/vault-action@v2.4.1
-        with:
-          url: https://vault.k8s.blockscout.com
-          role: ci-dev
-          path: github-jwt
-          method: jwt
-          tlsSkipVerify: false
-          exportToken: true
-          secrets: |
-            ci/data/dev/github token | WORKFLOW_TRIGGER_TOKEN ;
-      - name: Trigger deploy
-        uses: convictional/trigger-workflow-and-wait@v1.6.1
-        with:
-          owner: blockscout
-          repo: deployment-values
-          github_token: ${{env.WORKFLOW_TRIGGER_TOKEN}}
-          workflow_file_name: deploy_blockscout.yaml
-          ref: main
-          wait_interval: 30
-          client_payload: '{ "instance": "dev", "globalEnv": "e2e"}'
-  test:
-    needs: deploy_e2e
-    uses: blockscout/blockscout-ci-cd/.github/workflows/e2e_new.yaml@master
-    secrets: inherit
+            ERL_FLAGS=+JPperf true

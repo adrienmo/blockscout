@@ -57,7 +57,9 @@ defmodule EthereumJSONRPC.Transactions do
           v: "0xbd",
           value: 0,
           transaction_index: 0,
-          created_contract_address_hash: "0xffc87239eb0267bc3ca2cd51d12fbf278e02ccb4"
+          created_contract_address_hash: "0xffc87239eb0267bc3ca2cd51d12fbf278e02ccb4",
+          confidential_compute_result: nil,
+          wrapped: nil
         }
       ]
 
