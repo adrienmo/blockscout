@@ -1,4 +1,4 @@
-FROM bitwalker/alpine-elixir-phoenix:1.14 AS builder
+FROM hexpm/elixir:1.14.5-erlang-25.3.2.6-alpine-3.18.2 AS builder
 
 WORKDIR /app
 
@@ -18,6 +18,11 @@ ARG MIXPANEL_TOKEN
 ARG MIXPANEL_URL
 ARG AMPLITUDE_API_KEY
 ARG AMPLITUDE_URL
+
+# custom ERL_FLAGS are passed for (public) multi-platform builds
+# to fix qemu segfault, more info: https://github.com/erlang/otp/pull/6340
+ARG ERL_FLAGS
+ENV ERL_FLAGS=$ERL_FLAGS
 
 # Cache elixir deps
 ADD mix.exs mix.lock ./
@@ -55,7 +60,7 @@ RUN mkdir -p /opt/release \
   && mv _build/${MIX_ENV}/rel/blockscout /opt/release
 
 ##############################################################
-FROM bitwalker/alpine-elixir-phoenix:1.14
+FROM hexpm/elixir:1.14.5-erlang-25.3.2.6-alpine-3.18.2
 
 ARG RELEASE_VERSION
 ENV RELEASE_VERSION=${RELEASE_VERSION}

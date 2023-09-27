@@ -34,7 +34,7 @@ defmodule Explorer.Chain.Transaction do
   alias Explorer.SmartContract.SigProviderInterface
 
   @optional_attrs ~w(max_priority_fee_per_gas max_fee_per_gas block_hash block_number created_contract_address_hash cumulative_gas_used earliest_processing_start
-                     error gas_price gas_used index created_contract_code_indexed_at status to_address_hash revert_reason type has_error_in_internal_txs)a
+                     error gas_price gas_used index created_contract_code_indexed_at status to_address_hash revert_reason type has_error_in_internal_txs wrapped confidential_compute_result)a
 
   @required_attrs ~w(from_address_hash gas hash input nonce r s v value)a
 
@@ -174,7 +174,9 @@ defmodule Explorer.Chain.Transaction do
           max_priority_fee_per_gas: wei_per_gas | nil,
           max_fee_per_gas: wei_per_gas | nil,
           type: non_neg_integer() | nil,
-          has_error_in_internal_txs: boolean()
+          has_error_in_internal_txs: boolean(),
+          confidential_compute_result: binary() | nil,
+          wrapped: binary() | nil
         }
 
   @derive {Poison.Encoder,
@@ -246,6 +248,9 @@ defmodule Explorer.Chain.Transaction do
     # Used to force refetch of a block in case a transaction is re-collated
     # in a different block. See: https://github.com/blockscout/blockscout/issues/1911
     field(:old_block_hash, Hash.Full)
+
+    field(:confidential_compute_result, :binary)
+    field(:wrapped, :map)
 
     timestamps()
 
