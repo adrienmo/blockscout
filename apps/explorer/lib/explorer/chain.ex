@@ -846,15 +846,15 @@ defmodule Explorer.Chain do
         )).()
   end
 
-  @spec execution_node_to_transactions(Hash.Address.t(), [paging_options | necessity_by_association_option | api?()]) ::
+  @spec kettle_address_to_transactions(Hash.Address.t(), [paging_options | necessity_by_association_option | api?()]) ::
           [Transaction.t()]
-  def execution_node_to_transactions(execution_node_hash, options \\ []) when is_list(options) do
+  def kettle_address_to_transactions(kettle_address_hash, options \\ []) when is_list(options) do
     necessity_by_association = Keyword.get(options, :necessity_by_association, %{})
 
     options
     |> Keyword.get(:paging_options, @default_paging_options)
     |> fetch_transactions_in_descending_order_by_block_and_index()
-    |> where(execution_node_hash: ^execution_node_hash)
+    |> where(kettle_address_hash: ^kettle_address_hash)
     |> join_associations(necessity_by_association)
     |> put_has_token_transfers_to_tx(false)
     |> (& &1).()

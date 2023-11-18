@@ -88,7 +88,7 @@ defmodule BlockScoutWeb.API.V2.TransactionController do
         "suave" ->
           necessity_by_association_with_actions
           |> Map.put(:logs, :optional)
-          |> Map.put([execution_node: :names], :optional)
+          |> Map.put([kettle_address: :names], :optional)
           |> Map.put([wrapped_to_address: :names], :optional)
 
         _ ->
@@ -157,14 +157,14 @@ defmodule BlockScoutWeb.API.V2.TransactionController do
     |> render(:transactions, %{transactions: transactions, items: true})
   end
 
-  def execution_node(conn, %{"execution_node_hash_param" => execution_node_hash_string} = params) do
-    with {:format, {:ok, execution_node_hash}} <- {:format, Chain.string_to_address_hash(execution_node_hash_string)} do
+  def kettle_address(conn, %{"kettle_address_hash_param" => kettle_address_hash_string} = params) do
+    with {:format, {:ok, kettle_address_hash}} <- {:format, Chain.string_to_address_hash(kettle_address_hash_string)} do
       full_options =
         [necessity_by_association: @transaction_necessity_by_association]
         |> Keyword.merge(put_key_value_to_paging_options(paging_options(params), :is_index_in_asc_order, true))
         |> Keyword.merge(@api_true)
 
-      transactions_plus_one = Chain.execution_node_to_transactions(execution_node_hash, full_options)
+      transactions_plus_one = Chain.kettle_address_to_transactions(kettle_address_hash, full_options)
 
       {transactions, next_page} = split_list_by_page(transactions_plus_one)
 

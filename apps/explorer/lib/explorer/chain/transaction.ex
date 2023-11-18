@@ -39,7 +39,7 @@ defmodule Explorer.Chain.Transaction do
   @optional_attrs ~w(max_priority_fee_per_gas max_fee_per_gas block_hash block_number created_contract_address_hash cumulative_gas_used earliest_processing_start
                      error gas_price gas_used index created_contract_code_indexed_at status to_address_hash revert_reason type has_error_in_internal_txs)a
 
-  @suave_optional_attrs ~w(execution_node_hash wrapped_type wrapped_nonce wrapped_to_address_hash wrapped_gas wrapped_gas_price wrapped_max_priority_fee_per_gas wrapped_max_fee_per_gas wrapped_value wrapped_input wrapped_v wrapped_r wrapped_s wrapped_hash)a
+  @suave_optional_attrs ~w(kettle_address_hash wrapped_type wrapped_nonce wrapped_to_address_hash wrapped_gas wrapped_gas_price wrapped_max_priority_fee_per_gas wrapped_max_fee_per_gas wrapped_value wrapped_input wrapped_v wrapped_r wrapped_s wrapped_hash)a
 
   @required_attrs ~w(from_address_hash gas hash input nonce r s v value)a
 
@@ -146,8 +146,8 @@ defmodule Explorer.Chain.Transaction do
    * `max_fee_per_gas` - Maximum total amount per unit of gas a user is willing to pay for a transaction, including base fee and priority fee.
    * `type` - New transaction type identifier introduced in EIP 2718 (Berlin HF)
    * `has_error_in_internal_txs` - shows if the internal transactions related to transaction have errors
-   * `execution_node` - execution node address (used by Suave)
-   * `execution_node_hash` - foreign key of `execution_node` (used by Suave)
+   * `kettle_address` - kettle address (used by Suave)
+   * `kettle_address_hash` - foreign key of `kettle_address` (used by Suave)
    * `wrapped_type` - transaction type from the `wrapped` field (used by Suave)
    * `wrapped_nonce` - nonce from the `wrapped` field (used by Suave)
    * `wrapped_to_address` - target address from the `wrapped` field (used by Suave)
@@ -208,8 +208,8 @@ defmodule Explorer.Chain.Transaction do
 
   if Application.compile_env(:explorer, :chain_type) == "suave" do
     @type suave :: %{
-            execution_node: %Ecto.Association.NotLoaded{} | Address.t() | nil,
-            execution_node_hash: Hash.Address.t() | nil,
+            kettle_address: %Ecto.Association.NotLoaded{} | Address.t() | nil,
+            kettle_address_hash: Hash.Address.t() | nil,
             wrapped_type: non_neg_integer() | nil,
             wrapped_nonce: non_neg_integer() | nil,
             wrapped_to_address: %Ecto.Association.NotLoaded{} | Address.t() | nil,
@@ -346,9 +346,9 @@ defmodule Explorer.Chain.Transaction do
 
     if System.get_env("CHAIN_TYPE") == "suave" do
       belongs_to(
-        :execution_node,
+        :kettle_address,
         Address,
-        foreign_key: :execution_node_hash,
+        foreign_key: :kettle_address_hash,
         references: :hash,
         type: Hash.Address
       )

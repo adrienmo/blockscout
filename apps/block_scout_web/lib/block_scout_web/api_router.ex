@@ -142,7 +142,7 @@ defmodule BlockScoutWeb.ApiRouter do
       end
 
       if System.get_env("CHAIN_TYPE") == "suave" do
-        get("/execution-node/:execution_node_hash_param", V2.TransactionController, :execution_node)
+        get("/kettle-address/:kettle_address_hash_param", V2.TransactionController, :kettle_address)
       end
 
       get("/:transaction_hash_param", V2.TransactionController, :transaction)
