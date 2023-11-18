@@ -797,6 +797,16 @@ defmodule BlockScoutWeb.API.V2.TransactionView do
     else
       types
     end
+
+    tx_types(tx, types, :confidential_compute_request)
+  end
+
+  defp tx_types(%Transaction{kettle_address_hash: kettle_address_hash} = tx, types, :confidential_compute_request) do
+    if is_nil(kettle_address_hash) do
+      types
+    else
+      [:confidential_compute_request | types]
+    end
   end
 
   defp block_timestamp(%Transaction{block: %Block{} = block}), do: block.timestamp
