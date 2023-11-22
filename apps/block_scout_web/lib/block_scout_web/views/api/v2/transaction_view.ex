@@ -801,8 +801,8 @@ defmodule BlockScoutWeb.API.V2.TransactionView do
     tx_types(tx, types, :confidential_compute_request)
   end
 
-  defp tx_types(%Transaction{kettle_address_hash: kettle_address_hash} = tx, types, :confidential_compute_request) do
-    if is_nil(kettle_address_hash) do
+  defp tx_types(%Transaction{} = tx, types, :confidential_compute_request) do
+    if tx |> Map.from_struct() |> Map.get(:kettle_address_hash) |> is_nil() do
       types
     else
       [:confidential_compute_request | types]
