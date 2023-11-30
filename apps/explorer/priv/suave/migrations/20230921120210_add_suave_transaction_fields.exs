@@ -3,7 +3,7 @@ defmodule Explorer.Repo.Suave.Migrations.AddSuaveTransactionFields do
 
   def change do
     alter table(:transactions) do
-      add(:execution_node_hash, :bytea, null: true)
+      add(:kettle_address_hash, :bytea, null: true)
       add(:wrapped_type, :integer, null: true)
       add(:wrapped_nonce, :integer, null: true)
       add(:wrapped_to_address_hash, :bytea, null: true)
@@ -19,6 +19,6 @@ defmodule Explorer.Repo.Suave.Migrations.AddSuaveTransactionFields do
       add(:wrapped_hash, :bytea, null: true)
     end
 
-    create(index(:transactions, :execution_node_hash))
+    create(index(:transactions, :kettle_address_hash))
   end
 end

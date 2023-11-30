@@ -467,7 +467,7 @@ defmodule BlockScoutWeb.API.V2.TransactionView do
   end
 
   defp suave_fields(transaction, result, single_tx?, conn, watchlist_names) do
-    if is_nil(transaction.execution_node_hash) do
+    if is_nil(transaction.kettle_address_hash) do
       result
     else
       {[wrapped_decoded_input], _, _} =
@@ -485,11 +485,11 @@ defmodule BlockScoutWeb.API.V2.TransactionView do
       result
       |> Map.put("allowed_peekers", suave_parse_allowed_peekers(transaction.logs))
       |> Map.put(
-        "execution_node",
+        "kettle_address",
         Helper.address_with_info(
           single_tx? && conn,
-          transaction.execution_node,
-          transaction.execution_node_hash,
+          transaction.kettle_address,
+          transaction.kettle_address_hash,
           single_tx?,
           watchlist_names
         )
@@ -796,6 +796,16 @@ defmodule BlockScoutWeb.API.V2.TransactionView do
       [:rootstock_bridge | types]
     else
       types
+    end
+
+    tx_types(tx, types, :confidential_compute_request)
+  end
+
+  defp tx_types(%Transaction{} = tx, types, :confidential_compute_request) do
+    if tx |> Map.from_struct() |> Map.get(:kettle_address_hash) |> is_nil() do
+      types
+    else
+      [:confidential_compute_request | types]
     end
   end
 

@@ -98,7 +98,7 @@ defmodule Indexer.Transform.Addresses do
         %{from: :to_address_hash, to: :hash}
       ],
       [
-        %{from: :execution_node_hash, to: :hash},
+        %{from: :kettle_address_hash, to: :hash},
         %{from: :wrapped_to_address_hash, to: :hash}
       ]
     ],
@@ -404,7 +404,7 @@ defmodule Indexer.Transform.Addresses do
               required(:nonce) => non_neg_integer(),
               optional(:to_address_hash) => String.t(),
               optional(:created_contract_address_hash) => String.t(),
-              optional(:execution_node_hash) => String.t(),
+              optional(:kettle_address_hash) => String.t(),
               optional(:wrapped_to_address_hash) => String.t()
             }
           ],
