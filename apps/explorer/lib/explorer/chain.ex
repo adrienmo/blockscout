@@ -846,15 +846,27 @@ defmodule Explorer.Chain do
         )).()
   end
 
-  @spec kettle_address_to_transactions(Hash.Address.t(), [paging_options | necessity_by_association_option | api?()]) ::
+  @spec kettle_address_to_transactions(Hash.Address.t() | nil, [
+          paging_options | necessity_by_association_option | api?()
+        ]) ::
           [Transaction.t()]
   def kettle_address_to_transactions(kettle_address_hash, options \\ []) when is_list(options) do
     necessity_by_association = Keyword.get(options, :necessity_by_association, %{})
 
+    # If the kettle address is not set, it means we want to return all the kettle transactions
+    # to do so we just look up in the database for all the transactions that are setting a kettle
+    # address
+    dynamic_where =
+      if is_nil(kettle_address_hash) do
+        dynamic([kt], not is_nil(kt.kettle_address_hash))
+      else
+        dynamic([kt], kt.kettle_address_hash == ^kettle_address_hash)
+      end
+
     options
     |> Keyword.get(:paging_options, @default_paging_options)
     |> fetch_transactions_in_descending_order_by_block_and_index()
-    |> where(kettle_address_hash: ^kettle_address_hash)
+    |> where(^dynamic_where)
     |> join_associations(necessity_by_association)
     |> put_has_token_transfers_to_tx(false)
     |> (& &1).()
