@@ -327,6 +327,62 @@ defmodule BlockScoutWeb.API.V2.TransactionController do
   end
 
   @doc """
+    Function to handle GET requests to `/api/v2/transactions/:transaction_hash_param/network-logs` endpoint.
+  """
+  @spec network_logs(Plug.Conn.t(), map()) :: Plug.Conn.t() | {atom(), any()}
+  def network_logs(conn, %{"transaction_hash_param" => transaction_hash_string} = params) do
+    with {:format, {:ok, transaction_hash}} <- {:format, Chain.string_to_transaction_hash(transaction_hash_string)},
+         {:not_found, {:ok, transaction}} <-
+           {:not_found, Chain.hash_to_transaction(transaction_hash, @api_true)},
+         {:ok, false} <- AccessHelper.restricted_access?(to_string(transaction.from_address_hash), params),
+         {:ok, false} <- AccessHelper.restricted_access?(to_string(transaction.to_address_hash), params) do
+      full_options =
+        [
+          necessity_by_association: %{
+            [address: :names] => :optional,
+            [address: :smart_contract] => :optional,
+            address: :optional
+          }
+        ]
+        |> Keyword.merge(paging_options(params))
+        |> Keyword.merge(@api_true)
+
+      logs_plus_one = Chain.transaction_to_logs(transaction_hash, full_options)
+
+      {logs, next_page} = split_list_by_page(logs_plus_one)
+
+      logs = machin(logs)
+
+      next_page_params =
+        next_page_params(next_page, logs, delete_parameters_from_next_page_params(params))
+
+      conn
+      |> put_status(200)
+      |> render(:network_logs, %{
+        tx_hash: transaction_hash,
+        logs: logs,
+        next_page_params: next_page_params
+      })
+    end
+  end
+
+  @topic_submission "0x90df693395246e7e7bc89be62a0a3fe4fae30fb49a904ad123d424da41d3743d"
+  @arg_types [array: {:tuple, [{:uint, 64}, :string, {:uint, 256}, :string]}]
+
+  defp machin(logs) do
+    logs
+    |> Enum.filter(&(&1.first_topic == @topic_submission))
+    |> Enum.flat_map(fn %{data: data} ->
+      ABI.TypeDecoder.decode(data.bytes, @arg_types) |> hd()
+
+    end)
+    |> Enum.map(fn {status_code, destination, response_time, response} ->
+      %{status_code: status_code, destination: destination, response_time: response_time, response: response}
+    end)
+  end
+
+
+  @doc """
     Function to handle GET requests to `/api/v2/transactions/:transaction_hash_param/state-changes` endpoint.
   """
   @spec state_changes(Plug.Conn.t(), map()) :: Plug.Conn.t() | {atom(), any()}

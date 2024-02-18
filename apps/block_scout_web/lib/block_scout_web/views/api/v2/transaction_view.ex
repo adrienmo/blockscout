@@ -155,6 +155,10 @@ defmodule BlockScoutWeb.API.V2.TransactionView do
     }
   end
 
+  def render("network_logs.json", %{logs: logs, next_page_params: next_page_params}) do
+    %{"items" => logs, "next_page_params" => next_page_params}
+  end
+
   def render("logs.json", %{logs: logs, next_page_params: next_page_params, tx_hash: tx_hash}) do
     decoded_logs = decode_logs(logs, false)
 

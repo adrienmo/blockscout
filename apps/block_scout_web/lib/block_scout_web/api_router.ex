@@ -150,6 +150,7 @@ defmodule BlockScoutWeb.ApiRouter do
       get("/:transaction_hash_param/token-transfers", V2.TransactionController, :token_transfers)
       get("/:transaction_hash_param/internal-transactions", V2.TransactionController, :internal_transactions)
       get("/:transaction_hash_param/logs", V2.TransactionController, :logs)
+      get("/:transaction_hash_param/network-logs", V2.TransactionController, :network_logs)
       get("/:transaction_hash_param/raw-trace", V2.TransactionController, :raw_trace)
       get("/:transaction_hash_param/state-changes", V2.TransactionController, :state_changes)
     end
